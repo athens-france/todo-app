@@ -10,7 +10,7 @@ public class TodoStore
 {
     private static string GetPath(string fileName)
     {
-        string folder = Path.Combine(AppContext.BaseDirectory, "bin");
+        string folder = Path.Combine(AppContext.BaseDirectory, "data");
         if (!Directory.Exists(folder))
         {
             Directory.CreateDirectory(folder);
