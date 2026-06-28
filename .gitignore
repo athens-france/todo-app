@@ -1,0 +1,20 @@
+# Build results
+[Bb]in/
+[Oo]bj/
+[Oo]utput/
+
+# .NET cache
+.vs/
+.vscode/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# NuGet packages
+packages/
+packages.config
+
+# OS files
+.DS_Store
+Thumbs.db
