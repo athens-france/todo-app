@@ -84,7 +84,9 @@ window.Render += dt =>
     float deleteBtnWidth = 120f;
     ImGui.SetCursorPosX(ImGui.GetWindowWidth() - deleteBtnWidth - 10f);
 
-    if (isDeleteMode)
+    bool wasDeleteMode = isDeleteMode;
+
+    if (wasDeleteMode)
     {
         ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0.8f, 0.2f, 0.2f, 0.8f));
         ImGui.PushStyleColor(ImGuiCol.ButtonHovered, new Vector4(0.9f, 0.3f, 0.3f, 1f));
@@ -96,7 +98,7 @@ window.Render += dt =>
         isDeleteMode = !isDeleteMode;
     }
 
-    if (isDeleteMode)
+    if (wasDeleteMode)
     {
         ImGui.PopStyleColor(3);
     }
@@ -159,17 +161,17 @@ window.Render += dt =>
                 {
                     ImGui.SameLine(ImGui.GetWindowWidth() - 30);
                     ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0.8f, 0.2f, 0.2f, 0.6f));
-                    if (ImGui.Button($"X##delbrd{i}"))
+                    bool deletedBrd = ImGui.Button($"X##delbrd{i}");
+                    ImGui.PopStyleColor();
+                    if (deletedBrd)
                     {
                         boards.RemoveAt(i);
                         TodoStore.SaveBoards(boards);
-                        ImGui.PopStyleColor();
                         ImGui.EndChild();
                         break;
                     }
-                    ImGui.PopStyleColor();
                 }
-
+                
                 ImGui.Separator();
                 DrawList(board.Items, ref board.InputText, ref board.ShowAdd, ref board.EditIdx, ref board.EditStr, () => TodoStore.SaveBoards(boards), $"brd{i}", isDeleteMode);
                 ImGui.EndChild();
@@ -213,14 +215,14 @@ window.Render += dt =>
                 if (isDeleteMode)
                 {
                     ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0.8f, 0.2f, 0.2f, 0.6f));
-                    if (ImGui.Button($"X##delctr{i}"))
+                    bool deletedCtr = ImGui.Button($"X##delctr{i}");
+                    ImGui.PopStyleColor();
+                    if (deletedCtr)
                     {
                         counters.RemoveAt(i);
                         TodoStore.SaveCounters(counters);
-                        ImGui.PopStyleColor();
                         continue;
                     }
-                    ImGui.PopStyleColor();
                     ImGui.SameLine();
                 }
 
