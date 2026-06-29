@@ -46,6 +46,7 @@ var window = Window.Create(WindowOptions.Default with
 {
     Title = "Todo App",
     Size = new Silk.NET.Maths.Vector2D<int>(900, 600)
+    WindowBorder = WindowBorder.Resizable
 });
 
 window.Load += () =>
@@ -65,6 +66,11 @@ window.Load += () =>
             motivationalImage = LoadTexture(files[random.Next(files.Length)]);
         }
     }
+};
+
+window.Resize += size =>
+{
+    gl?.Viewport(0, 0, (uint)size.X, (uint)size.Y);
 };
 
 window.Render += dt =>
