@@ -226,13 +226,11 @@ window.Render += dt =>
                     ImGui.SameLine();
                 }
 
-                ImGui.Text(counter.Name);
+                if (ImGui.Button($"+##up{i}")) { counter.Value++; TodoStore.SaveCounters(counters); }
                 ImGui.SameLine();
-                if (ImGui.Button($"<##down{i}")) { counter.Value--; TodoStore.SaveCounters(counters); }
+                if (ImGui.Button($"-##down{i}")) { counter.Value--; TodoStore.SaveCounters(counters); }
                 ImGui.SameLine();
-                ImGui.Text(counter.Value.ToString());
-                ImGui.SameLine();
-                if (ImGui.Button($">##up{i}")) { counter.Value++; TodoStore.SaveCounters(counters); }
+                ImGui.Text($"{counter.Name} - {counter.Value}");
             }
             ImGui.EndTabItem();
         }
