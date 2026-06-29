@@ -41,6 +41,7 @@ bool isDeleteMode = false;
 uint motivationalImage = 0;
 Vector2 motivationalImageSize = new Vector2(150, 150);
 
+float accentHue = 0.6f;
 
 var window = Window.Create(WindowOptions.Default with
 {
@@ -54,6 +55,8 @@ window.Load += () =>
     gl = window.CreateOpenGL();
     var input = window.CreateInput();
     imgui = new ImGuiController(gl, window, input);
+
+    ApplyAccentHue(accentHue);
 
     // load random image
     string dir = "motivationalimages";
@@ -115,7 +118,7 @@ window.Render += dt =>
     {
         if (ImGui.BeginTabItem("todo"))
         {
-            DrawList(todos, ref inputText, ref showInput, ref todoEditIndex, ref todoEditText, () => TodoStore.Save(todos), "todo", isDeleteMode);
+            DrawList(todos, ref inputText, ref showInput, ref todoEditIndex, ref todoEditText, () => TodoStore.Save(todos), "todo", isDeleteMode, accentHue);
             ImGui.EndTabItem();
         }
 
@@ -124,7 +127,7 @@ window.Render += dt =>
         {
             ImGui.TextDisabled("these reset every day, but never disappear! this is your daily schedule.");
             ImGui.Spacing();
-            DrawList(daily, ref dailyInputText, ref showDailyInput, ref dailyEditIndex, ref dailyEditText, () => TodoStore.SaveDaily(daily), "daily", isDeleteMode);
+            DrawList(daily, ref dailyInputText, ref showDailyInput, ref dailyEditIndex, ref dailyEditText, () => TodoStore.SaveDaily(daily), "daily", isDeleteMode, accentHue);
             ImGui.EndTabItem();
         }
 
@@ -179,7 +182,7 @@ window.Render += dt =>
                 }
                 
                 ImGui.Separator();
-                DrawList(board.Items, ref board.InputText, ref board.ShowAdd, ref board.EditIdx, ref board.EditStr, () => TodoStore.SaveBoards(boards), $"brd{i}", isDeleteMode);
+                DrawList(board.Items, ref board.InputText, ref board.ShowAdd, ref board.EditIdx, ref board.EditStr, () => TodoStore.SaveBoards(boards), $"brd{i}", isDeleteMode, accentHue);
                 ImGui.EndChild();
                 ImGui.SameLine();
             }
@@ -241,6 +244,20 @@ window.Render += dt =>
             ImGui.EndTabItem();
         }
 
+        if (ImGui.BeginTabItem("settings"))
+        {
+            ImGui.Spacing();
+            ImGui.Text("accent color");
+            ImGui.SetNextItemWidth(300f);
+            if (ImGui.SliderFloat("##hue", ref accentHue, 0f, 1f))
+            {
+                ApplyAccentHue(accentHue);
+            }
+            ImGui.SameLine();
+            ImGui.ColorButton("##preview", HsvToRgb(accentHue, 0.6f, 0.6f));
+            ImGui.EndTabItem();
+        }
+
         ImGui.EndTabBar();
     }
 
@@ -270,7 +287,34 @@ window.Render += dt =>
 window.Closing += () => imgui?.Dispose();
 window.Run();
 
-void DrawList(List<(string text, bool done)> list, ref string input, ref bool showAdd, ref int editIdx, ref string editStr, Action onSave, string idSuffix, bool isDeleteMode)
+void ApplyAccentHue(float hue)
+{
+    var style = ImGui.GetStyle();
+    style.Colors[(int)ImGuiCol.Button] = HsvToRgb(hue, 0.6f, 0.6f);
+    style.Colors[(int)ImGuiCol.ButtonHovered] = HsvToRgb(hue, 0.7f, 0.7f);
+    style.Colors[(int)ImGuiCol.ButtonActive] = HsvToRgb(hue, 0.8f, 0.9f);
+    style.Colors[(int)ImGuiCol.CheckMark] = HsvToRgb(hue, 0.8f, 1f);
+    style.Colors[(int)ImGuiCol.SliderGrab] = HsvToRgb(hue, 0.6f, 0.6f);
+    style.Colors[(int)ImGuiCol.SliderGrabActive] = HsvToRgb(hue, 0.8f, 0.9f);
+    style.Colors[(int)ImGuiCol.Header] = HsvToRgb(hue, 0.6f, 0.5f);
+    style.Colors[(int)ImGuiCol.HeaderHovered] = HsvToRgb(hue, 0.7f, 0.6f);
+    style.Colors[(int)ImGuiCol.HeaderActive] = HsvToRgb(hue, 0.8f, 0.7f);
+    style.Colors[(int)ImGuiCol.TabActive] = HsvToRgb(hue, 0.6f, 0.6f);
+    style.Colors[(int)ImGuiCol.TabHovered] = HsvToRgb(hue, 0.5f, 0.5f);
+    style.Colors[(int)ImGuiCol.Tab] = HsvToRgb(hue, 0.4f, 0.35f);
+    style.Colors[(int)ImGuiCol.TabUnfocusedActive] = HsvToRgb(hue, 0.4f, 0.4f);
+    style.Colors[(int)ImGuiCol.FrameBg] = HsvToRgb(hue, 0.4f, 0.25f);
+    style.Colors[(int)ImGuiCol.FrameBgHovered] = HsvToRgb(hue, 0.4f, 0.35f);
+    style.Colors[(int)ImGuiCol.FrameBgActive] = HsvToRgb(hue, 0.5f, 0.45f);
+}
+ 
+Vector4 HsvToRgb(float h, float s, float v)
+{
+    ImGui.ColorConvertHSVtoRGB(h, s, v, out float r, out float g, out float b);
+    return new Vector4(r, g, b, 1f);
+}
+
+void DrawList(List<(string text, bool done)> list, ref string input, ref bool showAdd, ref int editIdx, ref string editStr, Action onSave, string idSuffix, bool isDeleteMode, float accentHue)
 {
     if (ImGui.Button(showAdd ? $"cancel##{idSuffix}" : $"+ add##{idSuffix}"))
     {
@@ -312,7 +356,11 @@ void DrawList(List<(string text, bool done)> list, ref string input, ref bool sh
             ImGui.SameLine();
         }
 
-        if (done) ImGui.PushStyleColor(ImGuiCol.CheckMark, new Vector4(0.2f, 0.5f, 1f, 1f));
+        if (done)
+        {
+            ImGui.ColorConvertHSVtoRGB(accentHue, 0.8f, 1f, out float r, out float g, out float b);
+            ImGui.PushStyleColor(ImGuiCol.CheckMark, new Vector4(r, g, b, 1f));
+        }
 
         bool check = done;
         if (ImGui.Checkbox($"##chk{idSuffix}_{i}", ref check))
